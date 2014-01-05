@@ -8,7 +8,7 @@ __license__ = "Dual License: GPLv2 and Commercial License"
 from datetime import datetime, timedelta
 from os import path, getenv, utime
 from platform import machine
-from random import shuffle, randrange
+from random import shuffle, randrange, seed as random_seed
 from requests import get as req_get
 from time import sleep, time
 from json import load as json_load
@@ -282,7 +282,8 @@ def youtube_get_random_channel_video(channel_name):
     data = json_load(json_data)
     items = data['data']['items']
     number_of_items = len(items)
-    random_item = items[randrange(0, number_of_items - 1)]
+    random_seed()
+    random_item = items[randrange(0, number_of_items - 1)] 
     item_url = random_item['player']['default']
     find_and_play_video(item_url)
 
