@@ -21,7 +21,7 @@ get_mimetype = (filename) =>
 
 url_test = (v) -> /(http|https):\/\/[\w-]+(\.?[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/.test v
 get_filename = (v) -> (v.replace /[\/\\\s]+$/g, '').replace /^.*[\\\/]/g, ''
-insertWbr = (v) -> (v.replace /\//g, '/<wbr>').replace /\&/g, '&amp;<wbr>'
+insertWbr = (v) -> ((v||'').replace /\//g, '/<wbr>').replace /\&/g, '&amp;<wbr>'
 
 # Tell Backbone to send its saves as JSON-encoded.
 Backbone.emulateJSON = on
@@ -74,11 +74,21 @@ class EditAssetView extends Backbone.View
 
     (@$ '.duration').toggle ((@model.get 'mimetype') != 'video' && (@model.get 'mimetype') != 'youtube')
     @clickTabNavUri() if (@model.get 'mimetype') == 'webpage'
+    @clickTabNavYoutube() if (@model.get 'mimetype') == 'youtube'
+
 
     for field in @model.fields
       if (@$fv field) != @model.get field
         @$fv field, @model.get field
-    (@$ '.uri-text').html insertWbr @model.get 'uri'
+
+    if (@model.get 'mimetype') == 'youtube'
+      (@$ '.uri-text').html insertWbr @model.get 'channel'
+      (@$ '.asset-location label').text 'Channel'
+    else
+      (@$ '.uri-text').html insertWbr @model.get 'uri'
+      (@$ '.asset-location label').text 'Asset Location'
+
+
 
     for which in ['start', 'end']
       d = date_to @model.get "#{which}_date"
@@ -196,6 +206,8 @@ class EditAssetView extends Backbone.View
       (@$ '#tab-uri').addClass 'active'
       (@$f 'uri').focus()
       @updateUriMimetype()
+      (@$fv 'mimetype', 'webpage') if (@$fv 'mimetype') == 'youtube'
+      (@$ '#mimetype').attr 'disabled', off
     no
 
   clickTabNavUpload: (e) => # TODO: clean
@@ -204,7 +216,8 @@ class EditAssetView extends Backbone.View
       (@$ '.tab-pane').removeClass 'active'
       (@$ '.tabnav-file_upload').addClass 'active'
       (@$ '#tab-file_upload').addClass 'active'
-      (@$fv 'mimetype', 'image') if (@$fv 'mimetype') == 'webpage'
+      (@$fv 'mimetype', 'image') if (@$fv 'mimetype') == 'webpage' or (@$fv 'mimetype') == 'youtube'
+      (@$ '#mimetype').attr 'disabled', off
       @updateFileUploadMimetype
     no
 
@@ -216,8 +229,7 @@ class EditAssetView extends Backbone.View
       (@$ '#tab-youtube').addClass 'active'
       (@$fv 'mimetype', 'youtube') if (@$fv 'mimetype') != 'youtube'
       @model.set 'mimetype', 'youtube'
-      (@$ '#mimetype').disabled on
-      @updateYouTubeMimetype
+      (@$ '#mimetype').attr 'disabled', on
     no
 
   updateUriMimetype: => _.defer => @updateMimetype @$fv 'uri'
@@ -258,10 +270,10 @@ class AssetRowView extends Backbone.View
     (@$ ".delete-asset-button").popover content: get_template 'confirm-delete'
     (@$ ".toggle input").prop "checked", @model.get 'is_enabled'
     (@$ ".asset-icon").addClass switch @model.get "mimetype"
-      when "video"   then "icon-facetime-video"
-      when "image"   then "icon-picture"
-      when "webpage" then "icon-globe"
-      when "youtube" then "icon-film"
+      when "video"   then "fa fa-video-camera"
+      when "image"   then "fa fa-camera"
+      when "webpage" then "fa fa-globe"
+      when "youtube" then "fa fa-youtube"
       else ""
     @el
 

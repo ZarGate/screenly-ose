@@ -284,8 +284,8 @@ def asset_loop(scheduler):
         view_image(HOME + LOAD_SCREEN)
         sleep(EMPTY_PL_DELAY)
 
-    elif path.isfile(asset['uri']) or not url_fails(asset['uri']):
-        name, mime, uri = asset['name'], asset['mimetype'], asset['uri']
+    elif path.isfile(asset['uri']) or not url_fails(asset['uri']) or asset['mimetype'] == 'youtube':
+        name, mime, uri, channel = asset['name'], asset['mimetype'], asset['uri'], asset['channel']
         logging.info('Showing asset %s (%s)', name, mime)
         logging.debug('Asset URI %s', uri)
         watchdog()
@@ -296,6 +296,8 @@ def asset_loop(scheduler):
             browser_url(uri)
         elif 'video' in mime:
             view_video(uri, asset['duration'])
+        elif 'youtube' in mime:
+            browser_url('http://www.youtube.com/user/{0}'.format(asset['channel']));
         else:
             logging.error('Unknown MimeType %s', mime)
 

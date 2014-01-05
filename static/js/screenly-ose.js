@@ -65,7 +65,7 @@
   };
 
   insertWbr = function(v) {
-    return (v.replace(/\//g, '/<wbr>')).replace(/\&/g, '&amp;<wbr>');
+    return ((v || '').replace(/\//g, '/<wbr>')).replace(/\&/g, '&amp;<wbr>');
   };
 
   Backbone.emulateJSON = true;
@@ -191,6 +191,9 @@
       if ((this.model.get('mimetype')) === 'webpage') {
         this.clickTabNavUri();
       }
+      if ((this.model.get('mimetype')) === 'youtube') {
+        this.clickTabNavYoutube();
+      }
       _ref4 = this.model.fields;
       for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
         field = _ref4[_j];
@@ -198,7 +201,13 @@
           this.$fv(field, this.model.get(field));
         }
       }
-      (this.$('.uri-text')).html(insertWbr(this.model.get('uri')));
+      if ((this.model.get('mimetype')) === 'youtube') {
+        (this.$('.uri-text')).html(insertWbr(this.model.get('channel')));
+        (this.$('.asset-location label')).text('Channel');
+      } else {
+        (this.$('.uri-text')).html(insertWbr(this.model.get('uri')));
+        (this.$('.asset-location label')).text('Asset Location');
+      }
       _ref5 = ['start', 'end'];
       for (_k = 0, _len2 = _ref5.length; _k < _len2; _k++) {
         which = _ref5[_k];
@@ -392,6 +401,10 @@
         (this.$('#tab-uri')).addClass('active');
         (this.$f('uri')).focus();
         this.updateUriMimetype();
+        if ((this.$fv('mimetype')) === 'youtube') {
+          this.$fv('mimetype', 'webpage');
+        }
+        (this.$('#mimetype')).attr('disabled', false);
       }
       return false;
     };
@@ -402,9 +415,10 @@
         (this.$('.tab-pane')).removeClass('active');
         (this.$('.tabnav-file_upload')).addClass('active');
         (this.$('#tab-file_upload')).addClass('active');
-        if ((this.$fv('mimetype')) === 'webpage') {
+        if ((this.$fv('mimetype')) === 'webpage' || (this.$fv('mimetype')) === 'youtube') {
           this.$fv('mimetype', 'image');
         }
+        (this.$('#mimetype')).attr('disabled', false);
         this.updateFileUploadMimetype;
       }
       return false;
@@ -420,8 +434,7 @@
           this.$fv('mimetype', 'youtube');
         }
         this.model.set('mimetype', 'youtube');
-        (this.$('#mimetype')).disabled(true);
-        this.updateYouTubeMimetype;
+        (this.$('#mimetype')).attr('disabled', true);
       }
       return false;
     };
@@ -512,13 +525,13 @@
       (this.$(".asset-icon")).addClass((function() {
         switch (this.model.get("mimetype")) {
           case "video":
-            return "icon-facetime-video";
+            return "fa fa-video-camera";
           case "image":
-            return "icon-picture";
+            return "fa fa-camera";
           case "webpage":
-            return "icon-globe";
+            return "fa fa-globe";
           case "youtube":
-            return "icon-film";
+            return "fa fa-youtube";
           default:
             return "";
         }
