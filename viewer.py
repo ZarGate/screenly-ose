@@ -15,6 +15,7 @@ from json import load as json_load
 from signal import signal, SIGUSR1, SIGUSR2
 import logging
 import sh
+import pafy
 
 from settings import settings
 import html_templates
@@ -274,6 +275,12 @@ def pro_init():
 
     return True
 
+def process_youtube(uri):
+    if not url_fails(uri):
+        video = pafy.new(uri)
+        best = video.getbest(preftype='mp4');
+        view_video(best.url, best.length)
+
 
 def asset_loop(scheduler):
     check_update()
@@ -297,7 +304,7 @@ def asset_loop(scheduler):
         elif 'video' in mime:
             view_video(uri, asset['duration'])
         elif 'youtube' in mime:
-            browser_url('http://www.youtube.com/user/{0}'.format(asset['channel']));
+            process_youtube(asset['channel'])
         else:
             logging.error('Unknown MimeType %s', mime)
 

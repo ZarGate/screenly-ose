@@ -22,6 +22,7 @@ sudo sed -e 's/^#xserver-command=X$/xserver-command=X -nocursor/g' -i /etc/light
 
 echo "Fetching the latest update..."
 cd $SCREENLY
+git remote set-url origin git@github.com:omelhus/screenly-ose.git ## Ensure correct upgrade path
 git pull
 
 echo "Ensuring all Python modules are installed..."
