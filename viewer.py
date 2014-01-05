@@ -282,7 +282,7 @@ def youtube_get_random_channel_video(channel_name):
     data = json_load(json_data)
     items = data['data']['items']
     number_of_items = len(items)
-    random_item = items[random.randrange(0, number_of_items - 1)
+    random_item = items[random.randrange(0, number_of_items - 1)]
     item_url = random_item['player']['default']
     process_youtube(item_url)
 
@@ -292,7 +292,7 @@ def process_youtube(uri):
         best = pafy.new(uri).getbest(preftype='mp4')
         logging.info('YouTube serving video %s (%s) [%s]', best.title, best.resolution, best.url)
         view_video(best.url, 'N/A')
-    else
+    else:
         youtube_get_random_channel_video(uri)
 
 def asset_loop(scheduler):
