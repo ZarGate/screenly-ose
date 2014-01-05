@@ -294,8 +294,10 @@ def find_and_play_video(uri):
 
 def process_youtube(uri):
     if not url_fails(uri):
+        logging.info("Loading videos from channel %s", uri)
         find_and_play_video(uri)
     else:
+        logging.info("Loading video from page %s", uri)
         youtube_get_random_channel_video(uri)
 
 def asset_loop(scheduler):
