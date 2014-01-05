@@ -277,9 +277,9 @@ def pro_init():
 
 def process_youtube(uri):
     if not url_fails(uri):
-        video = pafy.new(uri)
-        best = video.getbest(preftype='mp4');
-        view_video(best.url, best.length)
+        best = pafy.new(uri).getbest(preftype='mp4')
+        logging.info('YouTube serving video %s (%s) [%s]', best.title, best.resolution, best.url)
+        view_video(best.url, 'N/A')
 
 
 def asset_loop(scheduler):
