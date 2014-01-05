@@ -292,7 +292,7 @@ def find_and_play_video(uri):
     view_video(best.url, 'N/A')
 
 def process_youtube(uri):
-    if not url_fails(uri):
+    if uri.startswith('http://'):
         logging.info("Loading video from page %s", uri)
         find_and_play_video(uri)
     elif len(uri) > 0:
