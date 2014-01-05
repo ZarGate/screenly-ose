@@ -8,7 +8,7 @@ __license__ = "Dual License: GPLv2 and Commercial License"
 from datetime import datetime, timedelta
 from os import path, getenv, utime
 from platform import machine
-from random import shuffle
+from random import shuffle, randrange
 from requests import get as req_get
 from time import sleep, time
 from json import load as json_load
@@ -16,6 +16,7 @@ from signal import signal, SIGUSR1, SIGUSR2
 import logging
 import sh
 import pafy
+import urllib2
 
 from settings import settings
 import html_templates
@@ -275,12 +276,24 @@ def pro_init():
 
     return True
 
+def youtube_get_random_channel_video(channel_name):
+    channel_url = 'http://gdata.youtube.com/feeds/api/users/{0}/uploads?&v=2&max-results=6&alt=jsonc'.format(channel_name)
+    json_data = urlopen(channel_url)
+    data = json_load(json_data)
+    items = data['data']['items']
+    number_of_items = len(items)
+    random_item = items[random.randrange(0, number_of_items - 1)
+    item_url = random_item['player']['default']
+    process_youtube(item_url)
+
+
 def process_youtube(uri):
     if not url_fails(uri):
         best = pafy.new(uri).getbest(preftype='mp4')
         logging.info('YouTube serving video %s (%s) [%s]', best.title, best.resolution, best.url)
         view_video(best.url, 'N/A')
-
+    else
+        youtube_get_random_channel_video(uri)
 
 def asset_loop(scheduler):
     check_update()
