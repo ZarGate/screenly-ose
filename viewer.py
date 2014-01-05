@@ -278,20 +278,23 @@ def pro_init():
 
 def youtube_get_random_channel_video(channel_name):
     channel_url = 'http://gdata.youtube.com/feeds/api/users/{0}/uploads?&v=2&max-results=6&alt=jsonc'.format(channel_name)
-    json_data = urlopen(channel_url)
+    json_data = urllib2.urlopen(channel_url)
     data = json_load(json_data)
     items = data['data']['items']
     number_of_items = len(items)
     random_item = items[random.randrange(0, number_of_items - 1)]
     item_url = random_item['player']['default']
-    process_youtube(item_url)
+    find_and_play_video(item_url)
 
-
-def process_youtube(uri):
+def find_and_play_video(uri):
     if not url_fails(uri):
         best = pafy.new(uri).getbest(preftype='mp4')
         logging.info('YouTube serving video %s (%s) [%s]', best.title, best.resolution, best.url)
         view_video(best.url, 'N/A')
+
+def process_youtube(uri):
+    if not url_fails(uri):
+        find_and_play_video(uri)
     else:
         youtube_get_random_channel_video(uri)
 
