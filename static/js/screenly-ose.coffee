@@ -29,7 +29,7 @@ Backbone.emulateJSON = on
 # Models
 API.Asset = class Asset extends Backbone.Model
   idAttribute: "asset_id"
-  fields: 'name mimetype uri start_date end_date duration'.split ' '
+  fields: 'name mimetype uri start_date end_date duration channel'.split ' '
   defaults: =>
     name: ''
     mimetype: 'webpage'
@@ -72,7 +72,7 @@ class EditAssetView extends Backbone.View
       (@$ '#modalLabel').text "Edit Asset"
       (@$ '.asset-location').hide(); (@$ '.asset-location.edit').show()
 
-    (@$ '.duration').toggle ((@model.get 'mimetype') != 'video')
+    (@$ '.duration').toggle ((@model.get 'mimetype') != 'video' && (@model.get 'mimetype') != 'youtube')
     @clickTabNavUri() if (@model.get 'mimetype') == 'webpage'
 
     for field in @model.fields
@@ -104,6 +104,7 @@ class EditAssetView extends Backbone.View
     'keyup': 'change'
     'click .tabnav-uri': 'clickTabNavUri'
     'click .tabnav-file_upload': 'clickTabNavUpload'
+    'click .tabnav-youtube': 'clickTabNavYoutube'
     'click .tabnav-file_upload, .tabnav-uri': 'displayAdvanced'
     'click .advanced-toggle': 'toggleAdvanced'
     'paste [name=uri]': 'updateUriMimetype'
@@ -156,21 +157,25 @@ class EditAssetView extends Backbone.View
     validators =
       duration: (v) =>
         if ('video' isnt @model.get 'mimetype') and (not (_.isNumber v*1 ) or v*1 < 1)
-          'please enter a valid number'
+          'Please enter a valid number'
       uri: (v) =>
         if @model.isNew() and ((that.$ '#tab-uri').hasClass 'active') and not url_test v
-          'please enter a valid URL'
+          'Please enter a valid URL'
       file_upload: (v) =>
-        if @model.isNew() and not v and not (that.$ '#tab-uri').hasClass 'active'
-          return 'please select a file'
+        if @model.isNew() and not v and (that.$ '#tab-file_upload').hasClass 'active'
+          return 'Please select a file'
       end_date: (v) =>
         unless (new Date @$fv 'start_date') < (new Date @$fv 'end_date')
-          'end date should be after start date'
+          return 'End date should be after start date'
+      channel: (v) =>
+        if ('youtube' == @model.get 'mimetype') and (not v.length > 0)
+          'Channel name must be provided'
     errors = ([field, v] for field, fn of validators when v = fn (@$fv field))
 
     (@$ ".control-group.warning .help-inline.warning").remove()
     (@$ ".control-group").removeClass 'warning'
     (@$ '[type=submit]').prop 'disabled', no
+    console.log errors
     for [field, v] in errors
       (@$ '[type=submit]').prop 'disabled', yes
       (@$ ".control-group.#{field}").addClass 'warning'
@@ -203,8 +208,22 @@ class EditAssetView extends Backbone.View
       @updateFileUploadMimetype
     no
 
+  clickTabNavYoutube: (e) => # TODO: clean
+    if not (@$ '#tab-youtube').hasClass 'active'
+      (@$ 'ul.nav-tabs li').removeClass 'active'
+      (@$ '.tab-pane').removeClass 'active'
+      (@$ '.tabnav-youtube').addClass 'active'
+      (@$ '#tab-youtube').addClass 'active'
+      (@$fv 'mimetype', 'youtube') if (@$fv 'mimetype') != 'youtube'
+      @model.set 'mimetype', 'youtube'
+      (@$ '#mimetype').disabled on
+      @updateYouTubeMimetype
+    no
+
   updateUriMimetype: => _.defer => @updateMimetype @$fv 'uri'
   updateFileUploadMimetype: => _.defer => @updateMimetype @$fv 'file_upload'
+  updateYouTubeMimetype: => _.defer => @updateMimetype 'mp4'
+
   updateMimetype: (filename) =>
     # also updates the filename label in the dom
     mt = get_mimetype filename
@@ -242,6 +261,7 @@ class AssetRowView extends Backbone.View
       when "video"   then "icon-facetime-video"
       when "image"   then "icon-picture"
       when "webpage" then "icon-globe"
+      when "youtube" then "icon-film"
       else ""
     @el
 

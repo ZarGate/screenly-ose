@@ -88,6 +88,8 @@
                   %ul.nav.nav-tabs
                     %li.active.tabnav-uri(style="margin-left:180px")
                       %a(href="#tab-uri", dataToggle="tab") URL
+                    %li.tabnav-youtube
+                      %a(href="#tab-youtube", dataToggle="tab") YouTube
                     %li.tabnav-file_upload
                       %a(href="#tab-file_upload", dataToggle="tab") Upload
                   .tab-content
@@ -97,13 +99,19 @@
                         .controls
                           %input.span4(type="text", name="uri", placeholder="Public URL to this asset's location")
                     #tab-file_upload.tab-pane
-                      .control-group
+                      .control-group.upload
                         %label.control-label Upload Asset
                         .controls
                           %div
                             %button.btn Choose file
                             %input(type="file", name="file_upload")
                           #file_upload_label
+                    #tab-youtube.tab-pane
+                      .control-group.channel
+                        %label.control-label Channel Name
+                        .controls
+                          %input.span4(type="text", name="channel", placeholder="YouTube Channel Name")
+
             .asset-location.edit(style="display:none")
               %fieldset
                 .control-group
@@ -115,10 +123,11 @@
               .control-group.mimetype
                 %label.control-label Asset Type
                 .controls
-                  %select.span2(name="mimetype")
+                  %select.span2(name="mimetype", id="mimetype")
                     %option(value="image") Image
                     %option(value="video") Video
                     %option(value="webpage") Webpage
+                    %option(value="youtube") YouTube
 
             %hr
             %fieldset

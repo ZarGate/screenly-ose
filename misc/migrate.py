@@ -76,6 +76,28 @@ def migrate_add_play_order():
                 asset.update({'play_order': 0})
                 update(cursor, asset['asset_id'], asset)
                 conn.commit()
+
+query_add_channel = """
+begin transaction;
+alter table assets add channel text;
+commit;
+"""
+
+
+def migrate_add_channel():
+    with open_db_get_cursor() as (cursor, conn):
+        col = 'channel'
+        if test_column(col, cursor):
+            print 'Column (' + col + ') already present'
+        else:
+            print 'Adding new column (' + col + ')'
+            cursor.executescript(query_add_channel)
+            assets = read(cursor)
+            for asset in assets:
+                asset.update({'channel': ''})
+                update(cursor, asset['asset_id'], asset)
+                conn.commit()
+
 # ✂--------
 query_create_assets_table = """
 create table assets(
@@ -87,6 +109,8 @@ start_date timestamp,
 end_date timestamp,
 duration text,
 mimetype text,
+channel text,
+play_order integer default 0,
 is_enabled integer default 0,
 nocache integer default 0)"""
 query_make_asset_id_primary_key = """
@@ -192,6 +216,7 @@ if __name__ == '__main__':
     migrate_add_is_enabled_and_nocache()
     migrate_make_asset_id_primary_key()
     migrate_add_play_order()
+    migrate_add_channel()
     ensure_conf()
     fix_supervisor()
     print "Migration done."

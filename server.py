@@ -116,7 +116,7 @@ def prepare_asset(request):
         return val.strip() if isinstance(val, basestring) else val
 
     if all([get('name'),
-            get('uri') or (request.files.file_upload != ""),
+            get('uri') or (request.files.file_upload != "") or (get('channel') and get('mimetype') == 'youtube'),
             get('mimetype')]):
 
         asset = {
@@ -125,6 +125,7 @@ def prepare_asset(request):
             'asset_id': get('asset_id'),
             'is_enabled': get('is_enabled'),
             'nocache': get('nocache'),
+            'channel': get('channel')
         }
 
         uri = get('uri') or False
@@ -145,7 +146,7 @@ def prepare_asset(request):
         if uri and filename:
             raise Exception("Invalid combination. Can't select both URI and a file.")
 
-        if uri and not uri.startswith('/'):
+        if not get('mimetype') == 'youtube' and uri and not uri.startswith('/'):
             if not validate_url(uri):
                 raise Exception("Invalid URL. Failed to add asset.")
             else:
@@ -169,7 +170,7 @@ def prepare_asset(request):
                 asset['duration'] = int(video_duration.total_seconds())
             else:
                 asset['duration'] = 'N/A'
-        else:
+        elif not asset['mimetype'] == 'youtube':
             # Crashes if it's not an int. We want that.
             asset['duration'] = int(get('duration'))
 
@@ -186,7 +187,7 @@ def prepare_asset(request):
         if not asset['asset_id']:
             raise Exception
 
-        if not asset['uri']:
+        if not asset['uri'] and not asset['mimetype'] == 'youtube':
             raise Exception
 
         return asset
@@ -218,7 +219,7 @@ def api(view):
 @api
 def add_asset():
     asset = prepare_asset(request)
-    if url_fails(asset['uri']):
+    if not asset['mimetype'] == 'youtube' and url_fails(asset['uri']):
         raise Exception("Could not retrieve file. Check the asset URL.")
     return assets_helper.create(db_conn, asset)
 
