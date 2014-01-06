@@ -1,0 +1,16 @@
+body {
+	background: #000;
+	color: #fff;
+}
+
+i {
+	left: 50%;
+    margin-left: -30px;
+    margin-top: -75px;
+    position: absolute;
+    top: 50%;
+}
+
+.fa-8x {
+	font-size: 10em;
+}

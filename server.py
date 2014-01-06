@@ -350,6 +350,15 @@ def static(path):
     return static_file(path, root='static')
 
 
+################################
+# Content Views
+################################
+
+@route('/loading')
+def loading():
+    return template('loading')
+
+
 if __name__ == "__main__":
     # Make sure the asset folder exist. If not, create it
     if not path.isdir(settings['assetdir']):

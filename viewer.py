@@ -17,6 +17,8 @@ import logging
 import sh
 import pafy
 import urllib2
+import subprocess
+import os
 
 from settings import settings
 import html_templates
@@ -276,28 +278,56 @@ def pro_init():
 
     return True
 
+last_youtube_item_hash = 0
+
 def youtube_get_random_channel_video(channel_name):
-    channel_url = 'http://gdata.youtube.com/feeds/api/users/{0}/uploads?&v=2&max-results=6&alt=jsonc'.format(channel_name)
+    global last_youtube_item_hash
+
+    channel_url = 'http://gdata.youtube.com/feeds/api/users/{0}/uploads?&v=2&max-results=6&alt=jsonc&hd'.format(channel_name)
     json_data = urllib2.urlopen(channel_url)
     data = json_load(json_data)
     items = data['data']['items']
     number_of_items = len(items)
     random_seed()
-    random_item = items[randrange(0, number_of_items - 1)] 
+    random_item = None 
+    if number_of_items <= 1:
+        random_item = items[0]
+    else:
+        while random_item == None or hash(random_item['player']['default']) == last_youtube_item_hash:
+            random_item = items[randrange(0, number_of_items - 1)] 
+
+    last_youtube_item_hash = hash(random_item['player']['default'])
     item_url = random_item['player']['default']
     find_and_play_video(item_url)
 
 def find_and_play_video(uri):
-    best = pafy.new(uri).getbest()
-    logging.info('YouTube serving video %s (%s)', best.title, best.resolution)
-    view_video(best.url, 'N/A')
+    video = pafy.new(uri)
+    video_id = video.videoid
+    best = video.getbest(preftype="mp4")
+    extension = best.extension
+    filesize = best.get_filesize()
+    filename = "{0}.{1}".format(video_id, extension)
+    fullfilepath = "/home/pi/screenly_assets/youtube/{0}".format(filename)
+    if os.path.isfile(fullfilepath) and os.path.getsize(fullfilepath) == filesize:
+        logging.info('[YouTube] %s (%s) [Cached]', best.title, best.resolution)
+        view_video(fullfilepath, 'N/A')
+    elif os.path.isfile(fullfilepath):
+        os.remove(fullfilepath)
+    
+    if not os.path.isfile(fullfilepath):
+        logging.info('[YouTube] %s (%s) [Downloading]', best.title, best.resolution)
+        browser_url('http://localhost:8080/loading')
+        command = '/usr/bin/curl -s "{0}" -o {1} &'.format(best.url, fullfilepath)
+        os.system(command)
+        sleep(3)
+        view_video(fullfilepath, 'N/A')
 
 def process_youtube(uri):
     if uri.startswith('http://'):
-        logging.info("Loading video from page %s", uri)
+        logging.info("[YouTube] Page %s", uri)
         find_and_play_video(uri)
     elif len(uri) > 0:
-        logging.info("Loading videos from channel %s", uri)
+        logging.info("[YouTube] Channel: %s", uri)
         youtube_get_random_channel_video(uri)
 
 def asset_loop(scheduler):
