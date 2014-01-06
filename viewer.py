@@ -294,7 +294,7 @@ def youtube_get_random_channel_video(channel_name):
         random_item = items[0]
     else:
         while random_item == None or hash(random_item['player']['default']) == last_youtube_item_hash:
-            random_item = items[randrange(0, number_of_items - 1)] 
+            random_item = items[randrange(0, number_of_items)] 
 
     last_youtube_item_hash = hash(random_item['player']['default'])
     item_url = random_item['player']['default']
