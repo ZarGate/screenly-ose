@@ -32,8 +32,8 @@ date_h = datetime.datetime(2013, 1, 20, 10, 59)
 date_d = datetime.datetime(2013, 1, 21, 00, 00)
 
 asset_x = {
-    'mimetype': u'web',
     'asset_id': u'4c8dbce552edb5812d3a866cfe5f159d',
+    'mimetype': u'web',
     'name': u'WireLoad',
     'uri': u'http://www.wireload.net',
     'start_date': date_a,
@@ -42,13 +42,14 @@ asset_x = {
     'is_enabled': 1,
     'nocache': 0,
     'play_order': 1,
+	'channel': None
 }
 asset_x_diff = {
     'duration': u'10'
 }
 asset_y = {
-    'mimetype': u'image',
     'asset_id': u'7e978f8c1204a6f70770a1eb54a76e9b',
+    'mimetype': u'image',
     'name': u'Google',
     'uri': u'https://www.google.com/images/srpr/logo3w.png',
     'start_date': date_c,
@@ -57,6 +58,7 @@ asset_y = {
     'is_enabled': 1,
     'nocache': 0,
     'play_order': 0,
+	'channel': None
 }
 asset_y_diff = {
     'duration': u'324'
