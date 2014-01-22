@@ -303,7 +303,6 @@ def youtube_get_random_channel_video(channel_name):
 def find_and_play_video(uri):
     video = pafy.new(uri)
     video_id = video.videoid
-    duration = video.length
     best = video.getbest(preftype="mp4")
     extension = best.extension
     filesize = best.get_filesize()
@@ -312,10 +311,9 @@ def find_and_play_video(uri):
     youtube_dir = os.path.dirname(fullfilepath)
     if not os.path.exists(youtube_dir):
         os.makedirs(youtube_dir)
-        sleep(3)
-    if os.path.isfile(fullfilepath) and os.path.getsize(fullfilepath) == filesize:
+    elif os.path.isfile(fullfilepath) and os.path.getsize(fullfilepath) == filesize:
         logging.info('[YouTube] %s (%s) [Cached]', best.title, best.resolution)
-        view_video(fullfilepath, duration)
+        view_video(fullfilepath, 'N/A')
     elif os.path.isfile(fullfilepath):
         os.remove(fullfilepath)
     
@@ -324,8 +322,8 @@ def find_and_play_video(uri):
         browser_url('http://localhost:8080/loading')
         command = '/usr/bin/curl -s "{0}" -o {1} &'.format(best.url, fullfilepath)
         os.system(command)
-        sleep(3)
-        view_video(fullfilepath, duration)
+        sleep(10)
+        view_video(fullfilepath, 'N/A')
 
 def process_youtube(uri):
     if uri.startswith('http://'):

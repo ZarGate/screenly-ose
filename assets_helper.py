@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG,
 FIELDS = ["asset_id", "name", "uri", "start_date",
           "end_date", "duration", "mimetype", "is_enabled", "nocache", "play_order", "channel"]
 
-create_assets_table = 'CREATE TABLE IF NOT EXISTS screenly_assets(asset_id varchar(255) primary key, name varchar(255), uri varchar(500), md5 varchar(255), start_date timestamp NOT NULL DEFAULT  \'0000-00-00 00:00:00\', end_date timestamp NOT NULL DEFAULT  \'0000-00-00 00:00:00\', duration varchar(255), mimetype varchar(255), is_enabled integer default 0, nocache integer default 0, play_order integer default 0, channel varchar(255))'
+create_assets_table = 'CREATE TABLE IF NOT EXISTS screenly_assets (asset_id varchar(255) primary key, name varchar(255), uri varchar(500), md5 varchar(255), start_date timestamp NOT NULL DEFAULT  \'0000-00-00 00:00:00\', end_date timestamp NOT NULL DEFAULT  \'0000-00-00 00:00:00\', duration varchar(255), mimetype varchar(255), is_enabled integer default 0, nocache integer default 0, play_order integer default 0, channel varchar(255))'
 
 get_time = datetime.datetime.utcnow
 
@@ -57,9 +57,9 @@ def create(conn, asset):
     if 'is_active' in asset:
         asset.pop('is_active')
     with db.commit(conn) as c:
-        query = queries.create(asset.keys()), asset.values()
+        query = queries.create(asset.keys())
         logging.debug('[mysql query] %s', query)
-        c.execute(query)
+        c.execute(query, asset.values())
     asset.update({'is_active': is_active(asset)})
     return asset
 
