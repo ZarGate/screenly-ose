@@ -81,7 +81,7 @@
 
     Asset.prototype.idAttribute = "asset_id";
 
-    Asset.prototype.fields = 'name mimetype uri start_date end_date duration channel'.split(' ');
+    Asset.prototype.fields = 'name mimetype uri start_date end_date duration'.split(' ');
 
     Asset.prototype.defaults = function() {
       return {
@@ -126,7 +126,6 @@
       this.updateYouTubeMimetype = __bind(this.updateYouTubeMimetype, this);
       this.updateFileUploadMimetype = __bind(this.updateFileUploadMimetype, this);
       this.updateUriMimetype = __bind(this.updateUriMimetype, this);
-      this.clickTabNavYoutube = __bind(this.clickTabNavYoutube, this);
       this.clickTabNavUpload = __bind(this.clickTabNavUpload, this);
       this.clickTabNavUri = __bind(this.clickTabNavUri, this);
       this.cancel = __bind(this.cancel, this);
@@ -192,7 +191,7 @@
         this.clickTabNavUri();
       }
       if ((this.model.get('mimetype')) === 'youtube') {
-        this.clickTabNavYoutube();
+        this.clickTabNavUri();
       }
       _ref4 = this.model.fields;
       for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
@@ -201,13 +200,8 @@
           this.$fv(field, this.model.get(field));
         }
       }
-      if ((this.model.get('mimetype')) === 'youtube') {
-        (this.$('.uri-text')).html(insertWbr(this.model.get('channel')));
-        (this.$('.asset-location label')).text('Channel');
-      } else {
-        (this.$('.uri-text')).html(insertWbr(this.model.get('uri')));
-        (this.$('.asset-location label')).text('Asset Location');
-      }
+	  (this.$('.uri-text')).html(insertWbr(this.model.get('uri')));
+	  (this.$('.asset-location label')).text('Asset Location');
       _ref5 = ['start', 'end'];
       for (_k = 0, _len2 = _ref5.length; _k < _len2; _k++) {
         which = _ref5[_k];
@@ -251,7 +245,6 @@
       'keyup': 'change',
       'click .tabnav-uri': 'clickTabNavUri',
       'click .tabnav-file_upload': 'clickTabNavUpload',
-      'click .tabnav-youtube': 'clickTabNavYoutube',
       'click .tabnav-file_upload, .tabnav-uri': 'displayAdvanced',
       'click .advanced-toggle': 'toggleAdvanced',
       'paste [name=uri]': 'updateUriMimetype',
@@ -353,11 +346,6 @@
           if (!((new Date(_this.$fv('start_date'))) < (new Date(_this.$fv('end_date'))))) {
             return 'End date should be after start date';
           }
-        },
-        channel: function(v) {
-          if (('youtube' === _this.model.get('mimetype')) && (!v.length > 0)) {
-            return 'Channel name must be provided';
-          }
         }
       };
       errors = (function() {
@@ -401,9 +389,6 @@
         (this.$('#tab-uri')).addClass('active');
         (this.$f('uri')).focus();
         this.updateUriMimetype();
-        if ((this.$fv('mimetype')) === 'youtube') {
-          this.$fv('mimetype', 'webpage');
-        }
         (this.$('#mimetype')).attr('disabled', false);
       }
       return false;
@@ -420,21 +405,6 @@
         }
         (this.$('#mimetype')).attr('disabled', false);
         this.updateFileUploadMimetype;
-      }
-      return false;
-    };
-
-    EditAssetView.prototype.clickTabNavYoutube = function(e) {
-      if (!(this.$('#tab-youtube')).hasClass('active')) {
-        (this.$('ul.nav-tabs li')).removeClass('active');
-        (this.$('.tab-pane')).removeClass('active');
-        (this.$('.tabnav-youtube')).addClass('active');
-        (this.$('#tab-youtube')).addClass('active');
-        if ((this.$fv('mimetype')) !== 'youtube') {
-          this.$fv('mimetype', 'youtube');
-        }
-        this.model.set('mimetype', 'youtube');
-        (this.$('#mimetype')).attr('disabled', true);
       }
       return false;
     };

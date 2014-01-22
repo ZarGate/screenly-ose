@@ -89,8 +89,6 @@
                   %ul.nav.nav-tabs
                     %li.active.tabnav-uri(style="margin-left:180px")
                       %a(href="#tab-uri", dataToggle="tab") URL
-                    %li.tabnav-youtube
-                      %a(href="#tab-youtube", dataToggle="tab") YouTube
                     %li.tabnav-file_upload
                       %a(href="#tab-file_upload", dataToggle="tab") Upload
                   .tab-content
@@ -107,11 +105,6 @@
                             %button.btn Choose file
                             %input(type="file", name="file_upload")
                           #file_upload_label
-                    #tab-youtube.tab-pane
-                      .control-group.channel
-                        %label.control-label Channel Name
-                        .controls
-                          %input.span4(type="text", name="channel", placeholder="YouTube Channel Name")
 
             .asset-location.edit(style="display:none")
               %fieldset

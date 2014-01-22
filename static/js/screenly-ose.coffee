@@ -29,7 +29,7 @@ Backbone.emulateJSON = on
 # Models
 API.Asset = class Asset extends Backbone.Model
   idAttribute: "asset_id"
-  fields: 'name mimetype uri start_date end_date duration channel'.split ' '
+  fields: 'name mimetype uri start_date end_date duration'.split ' '
   defaults: =>
     name: ''
     mimetype: 'webpage'
@@ -74,19 +74,15 @@ class EditAssetView extends Backbone.View
 
     (@$ '.duration').toggle ((@model.get 'mimetype') != 'video' && (@model.get 'mimetype') != 'youtube')
     @clickTabNavUri() if (@model.get 'mimetype') == 'webpage'
-    @clickTabNavYoutube() if (@model.get 'mimetype') == 'youtube'
+    @clickTabNavUri() if (@model.get 'mimetype') == 'youtube'
 
 
     for field in @model.fields
       if (@$fv field) != @model.get field
         @$fv field, @model.get field
 
-    if (@model.get 'mimetype') == 'youtube'
-      (@$ '.uri-text').html insertWbr @model.get 'channel'
-      (@$ '.asset-location label').text 'Channel'
-    else
-      (@$ '.uri-text').html insertWbr @model.get 'uri'
-      (@$ '.asset-location label').text 'Asset Location'
+    (@$ '.uri-text').html insertWbr @model.get 'uri'
+    (@$ '.asset-location label').text 'Asset Location'
 
 
 
@@ -177,9 +173,6 @@ class EditAssetView extends Backbone.View
       end_date: (v) =>
         unless (new Date @$fv 'start_date') < (new Date @$fv 'end_date')
           return 'End date should be after start date'
-      channel: (v) =>
-        if ('youtube' == @model.get 'mimetype') and (not v.length > 0)
-          'Channel name must be provided'
     errors = ([field, v] for field, fn of validators when v = fn (@$fv field))
 
     (@$ ".control-group.warning .help-inline.warning").remove()

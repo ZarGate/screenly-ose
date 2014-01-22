@@ -35,6 +35,7 @@ SCREENLY_HTML = '/tmp/screenly_html/'
 LOAD_SCREEN = '/screenly/loading.jpg'  # relative to $HOME
 UZBLRC = '/screenly/misc/uzbl.rc'  # relative to $HOME
 INTRO = '/screenly/intro-template.html'
+LOAD_HTML = 'http://localhost:8080/loading'
 
 current_browser_url = None
 browser = None
@@ -78,8 +79,8 @@ class Scheduler(object):
         logging.debug('refresh_playlist')
         time_cur = datetime.utcnow()
         logging.debug('refresh: counter: (%s) deadline (%s) timecur (%s)', self.counter, self.deadline, time_cur)
-        if self.get_db_mtime() > self.last_update_db_mtime:
-            logging.debug('updating playlist due to database modification')
+        if self.index + 1 >= self.nassets:
+            logging.debug('updating playlist because it reached end')
             self.update_playlist()
         elif settings['shuffle_playlist'] and self.counter >= 5:
             self.update_playlist()
@@ -88,20 +89,11 @@ class Scheduler(object):
 
     def update_playlist(self):
         logging.debug('update_playlist')
-        self.last_update_db_mtime = self.get_db_mtime()
         (self.assets, self.deadline) = generate_asset_list()
         self.nassets = len(self.assets)
         self.counter = 0
         self.index = 0
         logging.debug('update_playlist done, count %s, counter %s, index %s, deadline %s', self.nassets, self.counter, self.index, self.deadline)
-
-    def get_db_mtime(self):
-        # get database file last modification time
-        try:
-            return path.getmtime(settings['database'])
-        except:
-            return 0
-
 
 def generate_asset_list():
     logging.info('Generating asset-list...')
@@ -280,26 +272,6 @@ def pro_init():
 
 last_youtube_item_hash = 0
 
-def youtube_get_random_channel_video(channel_name):
-    global last_youtube_item_hash
-
-    channel_url = 'http://gdata.youtube.com/feeds/api/users/{0}/uploads?&v=2&max-results=6&alt=jsonc&hd'.format(channel_name)
-    json_data = urllib2.urlopen(channel_url)
-    data = json_load(json_data)
-    items = data['data']['items']
-    number_of_items = len(items)
-    random_seed()
-    random_item = None 
-    if number_of_items <= 1:
-        random_item = items[0]
-    else:
-        while random_item == None or hash(random_item['player']['default']) == last_youtube_item_hash:
-            random_item = items[randrange(0, number_of_items)] 
-
-    last_youtube_item_hash = hash(random_item['player']['default'])
-    item_url = random_item['player']['default']
-    find_and_play_video(item_url)
-
 def find_and_play_video(uri):
     video = pafy.new(uri)
     video_id = video.videoid
@@ -319,19 +291,15 @@ def find_and_play_video(uri):
     
     if not os.path.isfile(fullfilepath):
         logging.info('[YouTube] %s (%s) [Downloading]', best.title, best.resolution)
-        browser_url('http://localhost:8080/loading')
+        browser_url(LOAD_HTML)
         command = '/usr/bin/curl -s "{0}" -o {1} &'.format(best.url, fullfilepath)
         os.system(command)
         sleep(10)
         view_video(fullfilepath, 'N/A')
 
 def process_youtube(uri):
-    if uri.startswith('http://'):
-        logging.info("[YouTube] Page %s", uri)
-        find_and_play_video(uri)
-    elif len(uri) > 0:
-        logging.info("[YouTube] Channel: %s", uri)
-        youtube_get_random_channel_video(uri)
+    logging.info("[YouTube] Video %s", uri)
+    find_and_play_video(uri)
         
 def asset_loop(scheduler):
     check_update()
@@ -343,7 +311,7 @@ def asset_loop(scheduler):
         sleep(EMPTY_PL_DELAY)
 
     elif path.isfile(asset['uri']) or not url_fails(asset['uri']) or asset['mimetype'] == 'youtube':
-        name, mime, uri, channel = asset['name'], asset['mimetype'], asset['uri'], asset['channel']
+        name, mime, uri = asset['name'], asset['mimetype'], asset['uri']
         logging.info('Showing asset %s (%s)', name, mime)
         logging.debug('Asset URI %s', uri)
         watchdog()
@@ -355,7 +323,7 @@ def asset_loop(scheduler):
         elif 'video' in mime:
             view_video(uri, asset['duration'])
         elif 'youtube' in mime:
-            process_youtube(asset['channel'])
+            process_youtube(uri)
         else:
             logging.error('Unknown MimeType %s', mime)
 
@@ -388,7 +356,7 @@ def main():
     if pro_init():
         return
 
-    url = 'http://{0}:{1}/splash_page'.format(settings.get_listen_ip(), settings.get_listen_port()) if settings['show_splash'] else 'file://' + BLACK_PAGE
+    url = 'http://{0}:{1}/splash_page'.format(settings.get_listen_ip(), settings.get_listen_port()) if settings['show_splash'] else LOAD_HTML
     load_browser(url=url)
 
     if settings['show_splash']:

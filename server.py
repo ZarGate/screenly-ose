@@ -116,7 +116,7 @@ def prepare_asset(request):
         return val.strip() if isinstance(val, basestring) else val
 
     if all([get('name'),
-            get('uri') or (request.files.file_upload != "") or (get('channel') and get('mimetype') == 'youtube'),
+            get('uri') or (request.files.file_upload != "") and get('mimetype') == 'youtube'),
             get('mimetype')]):
 
         asset = {
@@ -124,8 +124,7 @@ def prepare_asset(request):
             'mimetype': get('mimetype'),
             'asset_id': get('asset_id'),
             'is_enabled': get('is_enabled'),
-            'nocache': get('nocache'),
-            'channel': get('channel')
+            'nocache': get('nocache')
         }
 
         uri = get('uri') or False
