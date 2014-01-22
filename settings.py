@@ -11,7 +11,11 @@ CONFIG_DIR = '.screenly/'
 CONFIG_FILE = 'screenly.conf'
 DEFAULTS = {
     'main': {
-        'database': CONFIG_DIR + 'screenly.db',
+        #'database': CONFIG_DIR + 'screenly.db',
+		'dbhost': '',
+		'dbuser': '',
+		'dbpass': '',
+		'dbdatabase': '',
         'listen': '0.0.0.0:8080',
         'assetdir': 'screenly_assets',
     },

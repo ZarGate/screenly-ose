@@ -5,7 +5,7 @@ import datetime
 FIELDS = ["asset_id", "name", "uri", "start_date",
           "end_date", "duration", "mimetype", "is_enabled", "nocache", "play_order", "channel"]
 
-create_assets_table = 'CREATE TABLE assets(asset_id text primary key, name text, uri text, md5 text, start_date timestamp, end_date timestamp, duration text, mimetype text, is_enabled integer default 0, nocache integer default 0, play_order integer default 0, channel text)'
+create_assets_table = 'CREATE TABLE IF NOT EXISTS screenly_assets(asset_id text primary key, name text, uri text, md5 text, start_date timestamp, end_date timestamp, duration text, mimetype text, is_enabled integer default 0, nocache integer default 0, play_order integer default 0, channel text)'
 
 get_time = datetime.datetime.utcnow
 

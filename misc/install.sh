@@ -22,7 +22,7 @@ echo "Installing dependencies..."
 sudo apt-get -y -qq install git-core python-pip python-netifaces python-simplejson python-imaging python-dev uzbl sqlite3 supervisor omxplayer x11-xserver-utils libx11-dev watchdog chkconfig feh > /dev/null
 
 echo "Downloading Screenly-OSE..."
-git clone git://github.com/omelhus/screenly-ose.git ~/screenly > /dev/null
+git clone git://github.com/fiLLLip/screenly-ose.git ~/screenly > /dev/null
 
 echo "Installing more dependencies..."
 sudo pip install -r ~/screenly/requirements.txt -q > /dev/null

@@ -371,9 +371,7 @@ if __name__ == "__main__":
         global db_conn
         db_conn = conn
         with db.cursor(db_conn) as c:
-            c.execute(queries.exists_table)
-            if c.fetchone() is None:
-                c.execute(assets_helper.create_assets_table)
+			c.execute(assets_helper.create_assets_table)
         run(host=settings.get_listen_ip(),
             port=settings.get_listen_port(),
             reloader=True)

@@ -19,6 +19,7 @@ import pafy
 import urllib2
 import subprocess
 import os
+import youtube_dl
 
 from settings import settings
 import html_templates
@@ -303,11 +304,16 @@ def youtube_get_random_channel_video(channel_name):
 def find_and_play_video(uri):
     video = pafy.new(uri)
     video_id = video.videoid
-    best = video.getbest(preftype="mp4")
+	duration = video.length
+	view_video(get_youtube_url(uri), duration)
+    """best = video.getbest(preftype="mp4")
     extension = best.extension
     filesize = best.get_filesize()
     filename = "{0}.{1}".format(video_id, extension)
     fullfilepath = "/home/pi/screenly_assets/youtube/{0}".format(filename)
+	youtube_dir = os.path.dirname(fullfilepath)
+	if not os.path.exists(youtube_dir):
+		os.makedirs(youtube_dir)
     if os.path.isfile(fullfilepath) and os.path.getsize(fullfilepath) == filesize:
         logging.info('[YouTube] %s (%s) [Cached]', best.title, best.resolution)
         view_video(fullfilepath, 'N/A')
@@ -320,7 +326,7 @@ def find_and_play_video(uri):
         command = '/usr/bin/curl -s "{0}" -o {1} &'.format(best.url, fullfilepath)
         os.system(command)
         sleep(3)
-        view_video(fullfilepath, 'N/A')
+        view_video(fullfilepath, duration)"""
 
 def process_youtube(uri):
     if uri.startswith('http://'):
@@ -330,6 +336,27 @@ def process_youtube(uri):
         logging.info("[YouTube] Channel: %s", uri)
         youtube_get_random_channel_video(uri)
 
+def get_youtube_url(uri):
+	ydl = youtube_dl.YoutubeDL({'outtmpl': '%(id)s%(ext)s'})
+	# Add all the available extractors
+	ydl.add_default_info_extractors()
+
+	result = ydl.extract_info('http://www.youtube.com/watch?v=BaW_jenozKc'
+		, download=False # We just want to extract the info
+		)
+
+	if 'entries' in result:
+		# Can be a playlist or a list of videos
+		video = result['entries'][0]
+	else:
+		# Just a video
+		video = result
+
+	logging.debug('[youtube-dl info] %s', video)
+	video_url = video['url']
+	logging.debug('[youtube-dl url] %s', video_url)
+	return video_url
+		
 def asset_loop(scheduler):
     check_update()
     asset = scheduler.get_next_asset()
@@ -374,7 +401,7 @@ def setup():
     signal(SIGUSR2, sigusr2)
 
     load_settings()
-    db_conn = db.conn(settings['database'])
+    db_conn = db.conn(settings['dbhost'], settings['dbuser'], settings['dbpass'], settings['dbdatabase'])
 
     sh.mkdir(SCREENLY_HTML, p=True)
     html_templates.black_page(BLACK_PAGE)
