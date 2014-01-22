@@ -64,22 +64,22 @@ class Scheduler(object):
 
     def get_next_asset(self):
         logging.debug('get_next_asset')
-        self.refresh_playlist()
-        logging.debug('get_next_asset after refresh')
+        idx = self.index
+        asset = self.assets[idx]
+        self.index = (self.index + 1) % self.nassets
         if self.nassets == 0:
             return None
-        idx = self.index
-        self.index = (self.index + 1) % self.nassets
         logging.debug('get_next_asset counter %s returning asset %s of %s', self.counter, idx + 1, self.nassets)
         if settings['shuffle_playlist'] and self.index == 0:
             self.counter += 1
-        return self.assets[idx]
+        self.refresh_playlist(idx)
+        return asset
 
-    def refresh_playlist(self):
+    def refresh_playlist(self, idx):
         logging.debug('refresh_playlist')
         time_cur = datetime.utcnow()
-        logging.debug('refresh: counter: (%s) deadline (%s) timecur (%s)', self.counter, self.deadline, time_cur)
-        if self.index + 1 >= self.nassets:
+        logging.debug('refresh: counter (%s) deadline (%s) timecur (%s) assets (%s) index (%s)', self.counter, self.deadline, time_cur, self.nassets, idx)
+        if idx + 1 >= self.nassets:
             logging.debug('updating playlist because it reached end')
             self.update_playlist()
         elif settings['shuffle_playlist'] and self.counter >= 5:
@@ -153,7 +153,7 @@ def browser_send(command, cb=lambda _: True):
 
 def browser_clear(force=False):
     """Load a black page. Default cb waits for the page to load."""
-    browser_url('file://' + BLACK_PAGE, force=force, cb=lambda buf: 'LOAD_FINISH' in buf and BLACK_PAGE in buf)
+    browser_url(LOAD_HTML, force=force, cb=lambda buf: 'LOAD_FINISH' in buf and LOAD_HTML in buf)
 
 
 def browser_url(url, cb=lambda _: True, force=False):
@@ -291,7 +291,6 @@ def find_and_play_video(uri):
     
     if not os.path.isfile(fullfilepath):
         logging.info('[YouTube] %s (%s) [Downloading]', best.title, best.resolution)
-        browser_url(LOAD_HTML)
         command = '/usr/bin/curl -s "{0}" -o {1} &'.format(best.url, fullfilepath)
         os.system(command)
         sleep(10)
@@ -321,8 +320,10 @@ def asset_loop(scheduler):
         elif 'web' in mime:
             browser_url(uri)
         elif 'video' in mime:
+            browser_url(LOAD_HTML)
             view_video(uri, asset['duration'])
         elif 'youtube' in mime:
+            browser_url(LOAD_HTML)
             process_youtube(uri)
         else:
             logging.error('Unknown MimeType %s', mime)
@@ -358,10 +359,11 @@ def main():
 
     url = 'http://{0}:{1}/splash_page'.format(settings.get_listen_ip(), settings.get_listen_port()) if settings['show_splash'] else LOAD_HTML
     load_browser(url=url)
-
+    
     if settings['show_splash']:
         sleep(SPLASH_DELAY)
-
+    
+    browser_url(LOAD_HTML)
     scheduler = Scheduler()
     logging.debug('Entering infinite loop.')
     while True:
