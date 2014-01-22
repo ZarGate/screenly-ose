@@ -1,11 +1,12 @@
-import sqlite3
-import MySQLdb as mdb
+#import sqlite3
+#import MySQLdb as mdb
+import mysql.connector as mdb
 from contextlib import contextmanager
 
 import queries
 
 #conn = lambda db: sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
-conn = lambda host,user,password,db: mdb.connect(host, user, password, db)
+conn = lambda dbhost,dbuser,dbpass,dbdatabase: mdb.connect(host=dbhost, user=dbuser, password=dbpass, database=dbdatabase)
 
 @contextmanager
 def cursor(connection):

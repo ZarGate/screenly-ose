@@ -366,12 +366,11 @@ if __name__ == "__main__":
     # Create config dir if it doesn't exist
     if not path.isdir(settings.get_configdir()):
         makedirs(settings.get_configdir())
-
-    with db.conn(settings['database']) as conn:
-        global db_conn
-        db_conn = conn
-        with db.cursor(db_conn) as c:
-			c.execute(assets_helper.create_assets_table)
-        run(host=settings.get_listen_ip(),
-            port=settings.get_listen_port(),
-            reloader=True)
+    
+    global db_conn
+    db_conn = db.conn(settings['dbhost'], settings['dbuser'], settings['dbpass'], settings['dbdatabase'])
+    with db.cursor(db_conn) as c:
+        c.execute(assets_helper.create_assets_table)
+    run(host=settings.get_listen_ip(),
+        port=settings.get_listen_port(),
+        reloader=True)
