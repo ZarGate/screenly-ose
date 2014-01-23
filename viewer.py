@@ -153,7 +153,7 @@ def browser_send(command, cb=lambda _: True):
 
 def browser_clear(force=False):
     """Load a black page. Default cb waits for the page to load."""
-    browser_url(LOAD_HTML, force=force, cb=lambda buf: 'LOAD_FINISH' in buf and LOAD_HTML in buf)
+    browser_url('file://' + BLACK_PAGE, force=force, cb=lambda buf: 'LOAD_FINISH' in buf and BLACK_PAGE in buf)
 
 
 def browser_url(url, cb=lambda _: True, force=False):
@@ -320,10 +320,8 @@ def asset_loop(scheduler):
         elif 'web' in mime:
             browser_url(uri)
         elif 'video' in mime:
-            browser_url(LOAD_HTML)
             view_video(uri, asset['duration'])
         elif 'youtube' in mime:
-            browser_url(LOAD_HTML)
             process_youtube(uri)
         else:
             logging.error('Unknown MimeType %s', mime)
@@ -357,13 +355,12 @@ def main():
     if pro_init():
         return
 
-    url = 'http://{0}:{1}/splash_page'.format(settings.get_listen_ip(), settings.get_listen_port()) if settings['show_splash'] else LOAD_HTML
+    url = 'http://{0}:{1}/splash_page'.format(settings.get_listen_ip(), settings.get_listen_port()) if settings['show_splash'] else 'file://' + BLACK_PAGE
     load_browser(url=url)
     
     if settings['show_splash']:
         sleep(SPLASH_DELAY)
     
-    browser_url(LOAD_HTML)
     scheduler = Scheduler()
     logging.debug('Entering infinite loop.')
     while True:
