@@ -9,9 +9,9 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%a, %d %b %Y %H:%M:%S')
 
 FIELDS = ["asset_id", "name", "uri", "start_date",
-          "end_date", "duration", "mimetype", "is_enabled", "nocache", "play_order"]
+          "end_date", "duration", "mimetype", "is_enabled", "nocache", "play_order", "screen_id"]
 
-create_assets_table = 'CREATE TABLE IF NOT EXISTS screenly_assets (asset_id varchar(255) primary key, name varchar(255), uri varchar(500), md5 varchar(255), start_date timestamp NOT NULL DEFAULT  \'0000-00-00 00:00:00\', end_date timestamp NOT NULL DEFAULT  \'0000-00-00 00:00:00\', duration varchar(255), mimetype varchar(255), is_enabled integer default 0, nocache integer default 0, play_order integer default 0)'
+create_assets_table = 'CREATE TABLE IF NOT EXISTS screenly_assets (asset_id varchar(255) primary key, name varchar(255), uri varchar(500), md5 varchar(255), start_date timestamp NOT NULL DEFAULT  \'0000-00-00 00:00:00\', end_date timestamp NOT NULL DEFAULT  \'0000-00-00 00:00:00\', duration varchar(255), mimetype varchar(255), is_enabled integer default 0, nocache integer default 0, play_order integer default 0, screen_id integer default 0)'
 
 get_time = datetime.datetime.utcnow
 
@@ -38,9 +38,9 @@ def is_active(asset, at_time=None):
     return False
 
 
-def get_playlist(conn):
+def get_playlist(conn, screen_id):
     """Returns all currently active assets."""
-    return filter(is_active, read(conn))
+    return filter(is_active, read(conn, screen_id))
 
 
 def mkdict(keys):
@@ -64,7 +64,7 @@ def create(conn, asset):
     return asset
 
 
-def read(conn, asset_id=None, keys=FIELDS):
+def read(conn, screen_id, asset_id=None, keys=FIELDS):
     """
     Fetch one or more assets from the database.
     Returns a list of dicts or one dict.
@@ -74,7 +74,7 @@ def read(conn, asset_id=None, keys=FIELDS):
     mk = mkdict(keys)
     with db.cursor(conn) as c:
         if asset_id is None:
-            c.execute(queries.read_all(keys))
+            c.execute(queries.read_all(keys, screen_id))
         else:
             c.execute(queries.read(keys), [asset_id])
         assets = [mk(asset) for asset in c.fetchall()]

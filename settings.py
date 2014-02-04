@@ -16,6 +16,7 @@ DEFAULTS = {
         'dbuser': '',
         'dbpass': '',
         'dbdatabase': '',
+        'screen_id': '',
         'listen': '0.0.0.0:8080',
         'assetdir': 'screenly_assets',
     },

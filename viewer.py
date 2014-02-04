@@ -97,7 +97,7 @@ class Scheduler(object):
 
 def generate_asset_list():
     logging.info('Generating asset-list...')
-    playlist = assets_helper.get_playlist(db_conn)
+    playlist = assets_helper.get_playlist(db_conn, settings['screen_id'])
     deadline = sorted([asset['end_date'] for asset in playlist])[0] if len(playlist) > 0 else None
     logging.debug('generate_asset_list deadline: %s', deadline)
 
